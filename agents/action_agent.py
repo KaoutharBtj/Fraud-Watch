@@ -63,11 +63,14 @@ def _write_audit(state: FraudState, audit_id: str) -> None:
             audit_id, customer_id,
             amount, country, device, hour, tx_last_hour,
             amount_ratio, country_changed, device_changed, outside_hours,
+            low_amount_probe, amount_escalating, small_tx_count,
             ml_score, shap_values,
             llm_reasoning, top_signals, final_decision, action_taken
         ) VALUES (
             %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s,
+            %s, %s,
             %s, %s, %s, %s
         )
     """
@@ -78,6 +81,9 @@ def _write_audit(state: FraudState, audit_id: str) -> None:
         tx["hour"], tx.get("tx_last_hour", 1),
         feat["amount_ratio"], bool(feat["country_changed"]),
         bool(feat["device_changed"]), bool(feat["outside_hours"]),
+        bool(feat.get("low_amount_probe", False)),
+        bool(feat.get("amount_escalating", False)),
+        feat.get("small_tx_count", 0),
         state["ml_score"],
         json.dumps(state["shap_values"]),
         state["llm_reasoning"],

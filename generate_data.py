@@ -1,33 +1,3 @@
-# generate_data.py
-# ─────────────────────────────────────────────────────────────────────────────
-# Generates 5 000 customer profiles and 100 000 NORMAL training transactions.
-#
-# Feature set (8 features — must match detector_agent.py and ML_model.py):
-#
-#   ORIGINAL (5):
-#     amount_ratio      — transaction amount / customer average
-#     country_changed   — 1 if country != usual_country
-#     device_changed    — 1 if device != usual_device
-#     outside_hours     — 1 if hour outside active window
-#     tx_last_hour      — number of transactions in the last hour
-#
-#   NEW (3) — card-testing / probing patterns:
-#     low_amount_probe  — 1 if amount_ratio < 0.4 AND tx_last_hour >= 2
-#                         (small amount + recent activity = possible probe)
-#     amount_escalating — 1 if the last 3 transactions for this customer
-#                         show a strictly increasing amount pattern
-#     small_tx_count    — number of recent transactions below 15% of avg_amount
-#                         (repeated micro-transactions = card testing)
-#
-# For NORMAL training data:
-#   - low_amount_probe  : rare (2% of normal txns)
-#   - amount_escalating : rare (5% of normal txns — can happen legitimately)
-#   - small_tx_count    : low Poisson draw (lambda=0.3)
-#
-# This teaches the Isolation Forest what "normal" looks like for these
-# features, so it can flag abnormally high values at inference time.
-# ─────────────────────────────────────────────────────────────────────────────
-
 import random
 import json
 import pandas as pd
@@ -83,10 +53,9 @@ cur.close()
 conn.close()
 print(f"Inserted {len(rows)} customers into PostgreSQL.")
 
-# ── Transaction generation ────────────────────────────────────────────────────
+#  Transaction generation ────────────────────────────────────────────────────
 
 print(f"Generating {N_TRANSACTIONS} normal training transactions...")
-
 # Keep a short recent-transaction history per customer to compute
 # amount_escalating and small_tx_count (last 3 amounts per customer)
 customer_history: dict[int, list[float]] = {cid: [] for cid in customers}

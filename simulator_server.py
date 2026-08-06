@@ -1,5 +1,3 @@
-# simulator_server.py
-
 from fastapi import FastAPI, HTTPException
 from threading import Thread
 from kafka import KafkaProducer
@@ -10,32 +8,23 @@ from database import get_connection, get_cursor
 
 app = FastAPI()
 
-# =====================================================
-# CUSTOMER PROFILES
-# =====================================================
-
-
-
-# =====================================================
-# KAFKA PRODUCER
-# =====================================================
-
 producer = KafkaProducer(
     bootstrap_servers="localhost:9092",
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+    api_version=(2, 8, 0)
 )
-
 TOPIC = "transactions"
 
 # =====================================================
 # LOAD CUSTOMERS FROM DATABASE
-# =====================================================
+# 
+#=====================================================
 
 def load_customers():
 
     with get_connection() as conn:
         with get_cursor(conn) as cur:
-
+            
             cur.execute("""
                 SELECT *
                 FROM customers

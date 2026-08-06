@@ -22,12 +22,19 @@ import numpy as np
 from collections import defaultdict
 
 from state import FraudState
-from ML_model import FEATURES, get_risk_score
+import ML_model
+from ML_model import FEATURES
 
 # ── Load model + SHAP explainer once at import time ──────────────────────────
 
-_model  = joblib.load("isolation_forest.pkl")
-_scaler = joblib.load("risk_scaler.pkl")
+# Use ML_model's own load_model() — this sets ML_model.model / ML_model.scaler,
+# which is what ML_model.get_risk_score() actually checks internally.
+# (Previously this loaded the .pkl files into separate local variables here,
+# which get_risk_score() never saw — causing "Model not loaded" at runtime.)
+ML_model.load_model()
+
+_model  = ML_model.model
+_scaler = ML_model.scaler
 
 try:
     _explainer = shap.TreeExplainer(_model)
@@ -161,7 +168,7 @@ def detector_agent(state: FraudState) -> FraudState:
     print(f"\n[Detector] Computing features...")
 
     features  = _compute_features(transaction, profile)
-    ml_score  = get_risk_score(features)
+    ml_score  = ML_model.get_risk_score(features)
     shap_vals = _get_shap_values(features)
 
     # ── Flag card-testing signals in output ───────────────────────────────────

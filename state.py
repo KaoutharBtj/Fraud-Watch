@@ -37,7 +37,7 @@ class FraudState(TypedDict):
 KAFKA_BROKER        = "localhost:9092"
 TRANSACTION_TOPIC   = "transactions"
 PROFILE_API         = "http://localhost:8000"
-OLLAMA_MODEL        = "qwen3:8b"          # change to qwen3:8b if available
+OLLAMA_MODEL        = "llama3.2:3b"          # change to qwen3:8b if available
 
 # Thresholds
 BLOCK_THRESHOLD     = 80

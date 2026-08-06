@@ -1,0 +1,30 @@
+# requirements.txt
+# Generated from actual imports across all project files.
+# Install everything at once with: python -m pip install -r requirements.txt
+
+# ── Web framework (simulator_server.py, api/main.py) ──────────────────────────
+fastapi
+uvicorn
+
+# ── Kafka (main.py, simulator_server.py) ──────────────────────────────────────
+kafka-python
+
+# ── Database (database.py, all agents) ────────────────────────────────────────
+psycopg2-binary
+python-dotenv
+
+# ── ML / feature engineering (detector_agent.py, ML_model.py, generate_data.py)
+scikit-learn
+shap
+joblib
+pandas
+numpy
+
+# ── LangGraph orchestration (orchestrator.py) ──────────────────────────────────
+langgraph
+
+# ── LLM (llm_reasoner_agent.py, chat_agent.py) ─────────────────────────────────
+ollama
+
+# ── HTTP client (ingestor_agent.py → calls simulator_server.py's profile API)
+requests
