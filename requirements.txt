@@ -13,6 +13,11 @@ kafka-python
 psycopg2-binary
 python-dotenv
 
+# ── Authentication (api/auth.py) ────────────────────────────────────────────────
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+
 # ── ML / feature engineering (detector_agent.py, ML_model.py, generate_data.py)
 scikit-learn
 shap
