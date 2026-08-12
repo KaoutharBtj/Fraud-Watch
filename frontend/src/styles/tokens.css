@@ -1,0 +1,59 @@
+/*
+  tokens.css
+  ─────────────────────────────────────────────────────────────────────────
+  Design tokens for the Fraud Watch dashboard.
+  Direction: a "security operations / ledger" aesthetic — dark, disciplined,
+  data-dense but scannable. The risk colors (approve/review/block) are tied
+  to real data states, not used as decorative accents. The copper accent is
+  reserved for interactive/brand elements only, so it never gets confused
+  with a risk signal.
+  ─────────────────────────────────────────────────────────────────────────
+*/
+
+:root {
+  /* ── Surfaces ─────────────────────────────────────────────────────────── */
+  --bg: #0b0e14;
+  --surface: #131826;
+  --surface-raised: #1b2233;
+  --border: #262f42;
+  --border-strong: #37415a;
+
+  /* ── Text ─────────────────────────────────────────────────────────────── */
+  --text-primary: #e9edf5;
+  --text-secondary: #8892a6;
+  --text-muted: #5b6478;
+
+  /* ── Brand / interactive accent (never used for risk meaning) ───────────── */
+  --accent: #c08552;
+  --accent-hover: #d69868;
+  --accent-muted: rgba(192, 133, 82, 0.15);
+
+  /* ── Risk states — tied to real data (BLOCK / REVIEW / APPROVE) ─────────── */
+  --risk-approve: #4caf7d;
+  --risk-approve-bg: rgba(76, 175, 125, 0.12);
+  --risk-review: #e0a93e;
+  --risk-review-bg: rgba(224, 169, 62, 0.12);
+  --risk-block: #d9534f;
+  --risk-block-bg: rgba(217, 83, 79, 0.12);
+
+  /* ── Type ─────────────────────────────────────────────────────────────── */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* ── Spacing scale ────────────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+
+  /* ── Radius / shadow ──────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}

@@ -1,3 +1,11 @@
+# api/models.py
+# ─────────────────────────────────────────────────────────────────────────────
+# Pydantic response models. Field names match the Postgres column names
+# exactly — RealDictCursor returns rows as dicts keyed by column name, and
+# FastAPI validates/serializes against these models by matching those keys.
+# If you add a column to init.sql, add the matching field here too.
+# ─────────────────────────────────────────────────────────────────────────────
+
 from datetime import datetime
 from typing import Optional, Any
 from pydantic import BaseModel
@@ -40,6 +48,15 @@ class TransactionDecision(BaseModel):
     top_signals: Optional[list[Any]] = None
     final_decision: str
     action_taken: Optional[str] = None
+
+    # Analyst override — present only if the decision was manually changed
+    previous_decision: Optional[str] = None
+    decision_updated_by: Optional[str] = None
+    decision_updated_at: Optional[datetime] = None
+
+
+class DecisionUpdate(BaseModel):
+    new_decision: str
 
 
 class StatsResponse(BaseModel):

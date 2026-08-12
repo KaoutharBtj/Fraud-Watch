@@ -45,7 +45,11 @@ CREATE TABLE IF NOT EXISTS fraud_decisions (
     final_decision                           VARCHAR(10)  NOT NULL
         CHECK (final_decision IN ('BLOCK', 'REVIEW', 'APPROVE')),
 
-    action_taken                              TEXT
+    action_taken                              TEXT,
+    
+    previous_decision        VARCHAR(10),
+    decision_updated_by      VARCHAR(50),
+    decision_updated_at      TIMESTAMPTZ
 );
 
 

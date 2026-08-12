@@ -34,7 +34,7 @@ _cors_origins = os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
-    allow_methods=["GET", "POST"],   # POST needed for /auth/login
+    allow_methods=["GET", "POST", "PATCH"],   # PATCH needed for analyst decision overrides
     allow_headers=["*"],
 )
 
