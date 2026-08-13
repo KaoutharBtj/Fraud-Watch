@@ -6,7 +6,7 @@
 # If you add a column to init.sql, add the matching field here too.
 # ─────────────────────────────────────────────────────────────────────────────
 
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, Any
 from pydantic import BaseModel
 
@@ -68,3 +68,18 @@ class StatsResponse(BaseModel):
     review_pct: float
     blocked_pct: float
     avg_ml_score: float
+
+
+class RiskDistribution(BaseModel):
+    low: int
+    medium: int
+    high: int
+    critical: int
+
+
+class TrendPoint(BaseModel):
+    day: date
+    approved: int
+    review: int
+    blocked: int
+    avg_score: float

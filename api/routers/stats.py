@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from fastapi import APIRouter, Depends
 
 from db import get_db
-from models import StatsResponse
+from models import StatsResponse, RiskDistribution, TrendPoint
 from auth import get_current_analyst
 
 router = APIRouter(tags=["stats"], dependencies=[Depends(get_current_analyst)])
@@ -47,3 +47,64 @@ def get_stats(cur=Depends(get_db)):
         blocked_pct=pct(blocked),
         avg_ml_score=round(float(avg_score), 2) if avg_score is not None else 0.0,
     )
+
+
+@router.get("/stats/distribution", response_model=RiskDistribution)
+def get_risk_distribution(cur=Depends(get_db)):
+    """
+    Transaction counts bucketed into 4 risk bands, for the risk-distribution
+    chart. Bucketing happens in SQL — cheaper than fetching every row and
+    counting in JavaScript.
+    """
+    cur.execute(
+        """
+        SELECT
+            CASE
+                WHEN ml_score >= 80 THEN 'critical'
+                WHEN ml_score >= 50 THEN 'high'
+                WHEN ml_score >= 25 THEN 'medium'
+                ELSE 'low'
+            END AS band,
+            COUNT(*) AS count
+        FROM fraud_decisions
+        GROUP BY band
+        """
+    )
+    counts = {"low": 0, "medium": 0, "high": 0, "critical": 0}
+    for row in cur.fetchall():
+        counts[row["band"]] = row["count"]
+
+    return RiskDistribution(**counts)
+
+
+@router.get("/stats/trend", response_model=list[TrendPoint])
+def get_trend(days: int = 7, cur=Depends(get_db)):
+    """
+    Daily decision counts + average risk score, for the trend chart.
+    Defaults to the last 7 days.
+    """
+    cur.execute(
+        """
+        SELECT
+            DATE_TRUNC('day', created_at)::date AS day,
+            COUNT(*) FILTER (WHERE final_decision = 'APPROVE') AS approved,
+            COUNT(*) FILTER (WHERE final_decision = 'REVIEW')  AS review,
+            COUNT(*) FILTER (WHERE final_decision = 'BLOCK')   AS blocked,
+            AVG(ml_score) AS avg_score
+        FROM fraud_decisions
+        WHERE created_at >= NOW() - make_interval(days => %s)
+        GROUP BY day
+        ORDER BY day
+        """,
+        (days,),
+    )
+    return [
+        TrendPoint(
+            day=row["day"],
+            approved=row["approved"],
+            review=row["review"],
+            blocked=row["blocked"],
+            avg_score=round(float(row["avg_score"]), 2) if row["avg_score"] else 0.0,
+        )
+        for row in cur.fetchall()
+    ]
