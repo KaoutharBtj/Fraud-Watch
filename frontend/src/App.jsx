@@ -8,6 +8,7 @@ import Transactions from './pages/Transactions'
 import TransactionDetail from './pages/TransactionDetail'
 import Customer from './pages/Customer'
 import Decisions from './pages/Decisions'
+import AgentChat from './pages/AgentChat'
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="transactions/:auditId" element={<TransactionDetail />} />
             <Route path="customers/:customerId" element={<Customer />} />
             <Route path="decisions" element={<Decisions />} />
+            <Route path="agent" element={<AgentChat />} />
           </Route>
         </Routes>
       </BrowserRouter>

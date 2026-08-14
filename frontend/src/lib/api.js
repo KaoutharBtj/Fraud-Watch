@@ -67,6 +67,16 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  post: (path, body, opts = {}) =>
+    request(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: opts.signal,
+    }),
+
+  del: (path) => request(path, { method: 'DELETE' }),
+
   async login(username, password) {
     // The backend's /auth/login expects OAuth2 form data, not JSON —
     // this matches FastAPI's OAuth2PasswordRequestForm on the server side.
