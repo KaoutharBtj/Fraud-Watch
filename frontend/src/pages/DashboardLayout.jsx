@@ -6,44 +6,89 @@
 // this renders next — this file only owns the layout frame.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { AgentChatProvider } from '../context/AgentChatContext'
 import { useTransactionAlerts } from '../hooks/useTransactionAlerts'
 import AlertToast from '../components/AlertToast'
+import {
+  IconGrid,
+  IconList,
+  IconShieldCheck,
+  IconBot,
+  IconChevronLeft,
+  IconChevronRight,
+  IconLogout,
+} from '../components/Icons'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Overview', end: true },
-  { to: '/transactions', label: 'Transactions' },
-  { to: '/decisions', label: 'Decisions' },
+  { to: '/', label: 'Overview', end: true, icon: IconGrid },
+  { to: '/transactions', label: 'Transactions', icon: IconList },
+  { to: '/decisions', label: 'Decisions', icon: IconShieldCheck },
+  { to: '/agent', label: 'AI Agent', icon: IconBot },
 ]
+
+// Sidebar collapsed/expanded state is remembered across page loads via
+// localStorage, same pattern as the auth token — read once at module init
+// so the very first render already has the right width (no flash/jump).
+const SIDEBAR_KEY = 'fraud_watch_sidebar_collapsed'
+
+function getInitialCollapsed() {
+  return localStorage.getItem(SIDEBAR_KEY) === 'true'
+}
 
 export default function DashboardLayout() {
   const { logout } = useAuth()
   const { alerts, dismissAlert, muted, toggleMuted } = useTransactionAlerts()
+  const [collapsed, setCollapsed] = useState(getInitialCollapsed)
+
+  function toggleSidebar() {
+    setCollapsed((prev) => {
+      const next = !prev
+      localStorage.setItem(SIDEBAR_KEY, String(next))
+      return next
+    })
+  }
 
   return (
-    <div className="shell">
+    <div className={`shell${collapsed ? ' sidebar-collapsed' : ''}`}>
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true" />
-          <span>Fraud Watch</span>
+          {!collapsed && <span>Fraud Watch</span>}
         </div>
 
         <nav>
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+                title={collapsed ? item.label : undefined}
+              >
+                <Icon className="nav-icon" />
+                {!collapsed && <span>{item.label}</span>}
+              </NavLink>
+            )
+          })}
         </nav>
 
-        <button className="logout" onClick={logout}>
-          Sign out
+        <button
+          className="sidebar-toggle"
+          onClick={toggleSidebar}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <IconChevronRight /> : <IconChevronLeft />}
+          {!collapsed && <span>Collapse</span>}
+        </button>
+
+        <button className="logout" onClick={logout} title={collapsed ? 'Sign out' : undefined}>
+          <IconLogout className="nav-icon" />
+          {!collapsed && <span>Sign out</span>}
         </button>
       </aside>
 
@@ -59,7 +104,9 @@ export default function DashboardLayout() {
           </button>
         </header>
         <main className="content">
-          <Outlet />
+          <AgentChatProvider>
+            <Outlet />
+          </AgentChatProvider>
         </main>
       </div>
 
@@ -70,6 +117,11 @@ export default function DashboardLayout() {
           display: grid;
           grid-template-columns: 220px 1fr;
           min-height: 100vh;
+          transition: grid-template-columns 0.18s ease;
+        }
+
+        .shell.sidebar-collapsed {
+          grid-template-columns: 68px 1fr;
         }
 
         .sidebar {
@@ -78,6 +130,7 @@ export default function DashboardLayout() {
           display: flex;
           flex-direction: column;
           padding: var(--space-5) var(--space-3);
+          overflow: hidden;
         }
 
         .brand {
@@ -89,6 +142,7 @@ export default function DashboardLayout() {
           font-size: 16px;
           padding: 0 var(--space-2);
           margin-bottom: var(--space-6);
+          white-space: nowrap;
         }
 
         .brand-mark {
@@ -97,6 +151,7 @@ export default function DashboardLayout() {
           border-radius: 50%;
           background: var(--accent);
           box-shadow: 0 0 0 3px var(--accent-muted);
+          flex-shrink: 0;
         }
 
         nav {
@@ -107,11 +162,24 @@ export default function DashboardLayout() {
         }
 
         .nav-item {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
           color: var(--text-secondary);
           text-decoration: none;
           font-size: 14px;
           padding: 9px var(--space-3);
           border-radius: var(--radius-sm);
+          white-space: nowrap;
+        }
+
+        .nav-icon {
+          flex-shrink: 0;
+        }
+
+        .sidebar-collapsed .nav-item {
+          justify-content: center;
+          padding: 9px;
         }
 
         .nav-item:hover {
@@ -125,14 +193,48 @@ export default function DashboardLayout() {
           font-weight: 500;
         }
 
-        .logout {
+        .sidebar-toggle {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
           background: none;
           border: 1px solid var(--border);
           color: var(--text-secondary);
           border-radius: var(--radius-sm);
-          padding: 8px;
+          padding: 8px var(--space-3);
           font-size: 13px;
           cursor: pointer;
+          margin-bottom: var(--space-2);
+          white-space: nowrap;
+        }
+
+        .sidebar-collapsed .sidebar-toggle {
+          justify-content: center;
+          padding: 8px;
+        }
+
+        .sidebar-toggle:hover {
+          border-color: var(--border-strong);
+          color: var(--text-primary);
+        }
+
+        .logout {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          background: none;
+          border: 1px solid var(--border);
+          color: var(--text-secondary);
+          border-radius: var(--radius-sm);
+          padding: 8px var(--space-3);
+          font-size: 13px;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .sidebar-collapsed .logout {
+          justify-content: center;
+          padding: 8px;
         }
 
         .logout:hover {
@@ -174,7 +276,8 @@ export default function DashboardLayout() {
         }
 
         @media (max-width: 720px) {
-          .shell {
+          .shell,
+          .shell.sidebar-collapsed {
             grid-template-columns: 1fr;
           }
           .sidebar {
@@ -185,6 +288,7 @@ export default function DashboardLayout() {
           }
           .brand { margin-bottom: 0; }
           nav { flex-direction: row; }
+          .sidebar-toggle { display: none; }
         }
       `}</style>
     </div>
