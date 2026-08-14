@@ -62,7 +62,6 @@ export function useApi(path, deps = [], options = {}) {
       cancelled = true
       if (interval) clearInterval(interval)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, pollMs])
 
   return { data, loading, error }
