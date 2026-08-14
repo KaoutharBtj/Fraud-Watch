@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from routers import transactions, customers, stats, decisions, auth
+from routers import transactions, customers, stats, decisions, auth, agent
 
 app = FastAPI(
     title="Fraud Detection Dashboard API",
@@ -44,6 +44,7 @@ app.include_router(transactions.router)
 app.include_router(customers.router)
 app.include_router(stats.router)
 app.include_router(decisions.router)
+app.include_router(agent.router)
 
 
 class HealthResponse(BaseModel):
