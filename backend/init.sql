@@ -61,3 +61,34 @@ CREATE INDEX IF NOT EXISTS idx_fraud_decisions_customer_id
 
 CREATE INDEX IF NOT EXISTS idx_fraud_decisions_final_decision
     ON fraud_decisions (final_decision);
+
+
+-- ── AI Agent chat history ────────────────────────────────────────────────
+-- Two normalized tables: conversations (threads) and messages (rows within
+-- a thread). ON DELETE CASCADE means deleting a conversation automatically
+-- removes all its messages in one statement — no orphaned rows, no need
+-- for the application to delete messages first.
+
+CREATE TABLE IF NOT EXISTS agent_conversations (
+    id                SERIAL       PRIMARY KEY,
+    analyst_username  VARCHAR(50)  NOT NULL REFERENCES analysts(username) ON DELETE CASCADE,
+    title             VARCHAR(120) NOT NULL,
+    created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS agent_messages (
+    id                SERIAL       PRIMARY KEY,
+    conversation_id   INTEGER      NOT NULL REFERENCES agent_conversations(id) ON DELETE CASCADE,
+    role              VARCHAR(10)  NOT NULL CHECK (role IN ('user', 'agent')),
+    content           TEXT         NOT NULL,
+    created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+-- Fast "list my conversations, most recent first" (sidebar of past chats)
+CREATE INDEX IF NOT EXISTS idx_agent_conversations_analyst
+    ON agent_conversations (analyst_username, updated_at DESC);
+
+-- Fast "load all messages for this conversation, in order"
+CREATE INDEX IF NOT EXISTS idx_agent_messages_conversation
+    ON agent_messages (conversation_id, created_at ASC);

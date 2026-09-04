@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import appLogo from '../assets/appLogo.png'
+import backgroundLogin from '../assets/backroundLogin.png'
 
 export default function Login() {
   const { login, error } = useAuth()
@@ -19,10 +21,13 @@ export default function Login() {
   }
 
   return (
-    <div className="login-screen">
+    <div
+      className="login-screen"
+      style={{ backgroundImage: `url(${backgroundLogin})` }}
+    >
       <div className="login-card">
         <div className="login-mark" aria-hidden="true">
-          <RiskDial />
+          <img src={appLogo} alt="Fraud Watch logo" className="login-logo" />
         </div>
 
         <h1>Fraud Watch</h1>
@@ -63,19 +68,21 @@ export default function Login() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background:
-            radial-gradient(circle at 50% -10%, rgba(192,133,82,0.08), transparent 60%),
-            var(--bg);
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
           padding: var(--space-4);
         }
 
         .login-card {
           width: 100%;
           max-width: 360px;
-          background: var(--surface);
-          border: 1px solid var(--border);
+          background: rgba(20, 16, 12, 0.45);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: var(--radius-md);
-          box-shadow: var(--shadow-card);
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
           padding: var(--space-6) var(--space-5);
           text-align: center;
         }
@@ -84,6 +91,12 @@ export default function Login() {
           display: flex;
           justify-content: center;
           margin-bottom: var(--space-4);
+        }
+
+        .login-logo {
+          width: 56px;
+          height: 56px;
+          object-fit: contain;
         }
 
         .login-card h1 {
@@ -110,8 +123,8 @@ export default function Login() {
         }
 
         .login-form input {
-          background: var(--bg);
-          border: 1px solid var(--border);
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.16);
           border-radius: var(--radius-sm);
           color: var(--text-primary);
           font-family: var(--font-mono);
@@ -153,37 +166,5 @@ export default function Login() {
         }
       `}</style>
     </div>
-  )
-}
-
-// Small inline SVG — the "risk dial" signature motif, used as the mark here
-// and reused (scaled) as the real risk meter on transaction screens later.
-function RiskDial() {
-  return (
-    <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-      <circle cx="28" cy="28" r="25" stroke="var(--border-strong)" strokeWidth="2" />
-      <path
-        d="M28 28 L28 10"
-        stroke="var(--accent)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        transform="rotate(35 28 28)"
-      />
-      <circle cx="28" cy="28" r="3" fill="var(--accent)" />
-      <path
-        d="M10 40 A25 25 0 0 1 16 15"
-        stroke="var(--risk-approve)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        opacity="0.7"
-      />
-      <path
-        d="M46 40 A25 25 0 0 0 40 15"
-        stroke="var(--risk-block)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        opacity="0.7"
-      />
-    </svg>
   )
 }

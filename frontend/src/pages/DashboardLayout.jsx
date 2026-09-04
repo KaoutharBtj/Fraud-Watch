@@ -21,6 +21,7 @@ import {
   IconChevronRight,
   IconLogout,
 } from '../components/Icons'
+import appLogo from '../assets/appLogo.png'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', end: true, icon: IconGrid },
@@ -55,7 +56,7 @@ export default function DashboardLayout() {
     <div className={`shell${collapsed ? ' sidebar-collapsed' : ''}`}>
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true" />
+          <img src={appLogo} alt="Fraud Watch logo" className="brand-logo" />
           {!collapsed && <span>Fraud Watch</span>}
         </div>
 
@@ -145,12 +146,10 @@ export default function DashboardLayout() {
           white-space: nowrap;
         }
 
-        .brand-mark {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background: var(--accent);
-          box-shadow: 0 0 0 3px var(--accent-muted);
+        .brand-logo {
+          width: 26px;
+          height: 26px;
+          object-fit: contain;
           flex-shrink: 0;
         }
 

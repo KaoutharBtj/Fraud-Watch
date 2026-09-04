@@ -1,10 +1,9 @@
 # api/routers/transactions.py
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from typing import List, Optional
-from datetime import datetime
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from db import get_db
@@ -30,65 +29,16 @@ ALLOWED_TRANSITIONS = {
 def get_recent_transactions(
     limit: int = Query(20, ge=1, le=100, description="Max transactions to return"),
     offset: int = Query(0, ge=0, description="Number of transactions to skip"),
-    customer_id: Optional[int] = Query(None, description="Filter by exact customer_id"),
-    country: Optional[str] = Query(None, description="Filter by country code (exact match)"),
-    device: Optional[str] = Query(None, description="Filter by device (exact match)"),
-    min_amount: Optional[float] = Query(None, ge=0, description="Minimum transaction amount"),
-    max_amount: Optional[float] = Query(None, ge=0, description="Maximum transaction amount"),
-    min_risk: Optional[float] = Query(None, ge=0, le=100, description="Minimum ml_score"),
-    max_risk: Optional[float] = Query(None, ge=0, le=100, description="Maximum ml_score"),
-    date_from: Optional[datetime] = Query(None, description="Only transactions at/after this time"),
-    date_to: Optional[datetime] = Query(None, description="Only transactions at/before this time"),
     cur=Depends(get_db),
 ):
-    """
-    Most recent transactions, newest first, with optional filters.
-    All filters are combined with AND and built as a parameterized WHERE
-    clause — never string-interpolated — so this stays safe from SQL
-    injection while still letting the analyst narrow the list down by
-    any combination of customer, amount, country, device, risk, or time.
-    """
-    conditions = []
-    params = []
-
-    if customer_id is not None:
-        conditions.append("customer_id = %s")
-        params.append(customer_id)
-    if country:
-        conditions.append("country = %s")
-        params.append(country)
-    if device:
-        conditions.append("device = %s")
-        params.append(device)
-    if min_amount is not None:
-        conditions.append("amount >= %s")
-        params.append(min_amount)
-    if max_amount is not None:
-        conditions.append("amount <= %s")
-        params.append(max_amount)
-    if min_risk is not None:
-        conditions.append("ml_score >= %s")
-        params.append(min_risk)
-    if max_risk is not None:
-        conditions.append("ml_score <= %s")
-        params.append(max_risk)
-    if date_from is not None:
-        conditions.append("created_at >= %s")
-        params.append(date_from)
-    if date_to is not None:
-        conditions.append("created_at <= %s")
-        params.append(date_to)
-
-    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-
+    """Most recent transactions, newest first. Used by the dashboard's main list."""
     cur.execute(
-        f"""
+        """
         SELECT * FROM fraud_decisions
-        {where_clause}
         ORDER BY created_at DESC
         LIMIT %s OFFSET %s
         """,
-        (*params, limit, offset),
+        (limit, offset),
     )
     return cur.fetchall()
 

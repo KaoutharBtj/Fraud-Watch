@@ -13,8 +13,8 @@
 # ─────────────────────────────────────────────────────────────────────────────
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from datetime import datetime
 from typing import List, Optional
@@ -104,8 +104,6 @@ async def chat_endpoint(
     else:
         conversation_id = _create_conversation(cur, analyst["username"], question)
 
-    # Persist the analyst's question immediately, so it's never lost even
-    # if the agent call below fails.
     cur.execute(
         "INSERT INTO agent_messages (conversation_id, role, content) VALUES (%s, 'user', %s)",
         (conversation_id, question),

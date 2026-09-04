@@ -17,6 +17,7 @@ python-dotenv
 passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
+slowapi
 
 # ── ML / feature engineering (detector_agent.py, ML_model.py, generate_data.py)
 scikit-learn
