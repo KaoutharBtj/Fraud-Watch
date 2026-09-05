@@ -14,7 +14,17 @@ psycopg2-binary
 python-dotenv
 
 # ── Authentication (api/auth.py) ────────────────────────────────────────────────
+# passlib[bcrypt] pulls in the LATEST bcrypt by default, but passlib 1.7.4
+# (its last release — the project is effectively unmaintained) is
+# incompatible with bcrypt >= 4.0: that release rewrote the library's
+# internals and made hashpw() raise ValueError on inputs over 72 bytes
+# instead of silently truncating them like every earlier version did.
+# passlib's own internal self-test (run once, the first time it initializes
+# its bcrypt backend) trips this immediately, before even reaching any
+# password we pass in — so no amount of truncating our own input avoids it.
+# Pinning below 4.0 is the standard, documented community workaround.
 passlib[bcrypt]
+bcrypt<4.0
 python-jose[cryptography]
 python-multipart
 slowapi

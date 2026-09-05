@@ -52,13 +52,23 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 # ── Password hashing ──────────────────────────────────────────────────────────
+# bcrypt's algorithm has a hard 72-BYTE limit on its input (not 72
+# characters — a multi-byte UTF-8 character can eat several of those 72
+# bytes). Older versions of the `bcrypt` package silently truncated
+# anything longer; newer versions (which unpinned installs now pull in)
+# raise ValueError instead. passlib (unmaintained since ~2020) was never
+# updated to handle this, so we truncate ourselves before ever handing the
+# password to passlib — matching bcrypt's original, expected behavior.
+def _bcrypt_safe(password: str) -> str:
+    return password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
+
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return pwd_context.hash(_bcrypt_safe(password))
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return pwd_context.verify(_bcrypt_safe(plain_password), hashed_password)
 
 
 # ── Token creation ────────────────────────────────────────────────────────────
